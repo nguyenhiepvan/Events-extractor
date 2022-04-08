@@ -1,0 +1,19 @@
+{
+    "name": "nguyenhiep/events-extractor",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Nguyenhiep\\EventsExtractor\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nguyễn Văn Hiệp",
+            "email": "nguyenhiepvan.bka@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-curl": "*",
+        "ext-ctype": "*"
+    }
+}

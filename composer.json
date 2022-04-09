@@ -14,6 +14,7 @@
     ],
     "require": {
         "ext-curl": "*",
-        "ext-ctype": "*"
+        "ext-ctype": "*",
+        "ext-mbstring": "*"
     }
 }

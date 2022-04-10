@@ -3,6 +3,7 @@
 - [x] parse breadcrumbs, keywords
 - [x] complete date missing year
 - [x] standardize date format
+- [ ] check duplicated events
 
 # TEST RESULTS
 [Original article](https://dantri.com.vn/kinh-doanh/huy-dong-von-cho-vinfast-nuoc-co-moi-cua-ty-phu-vuong-tren-dat-my-20220408081321465.htm)

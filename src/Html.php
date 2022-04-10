@@ -162,7 +162,7 @@ function standardizeDate(array $dates, int $year_created_at): array
         foreach ($data as &$_data) {
             $_data = str_pad($_data, 2, '0', STR_PAD_LEFT);
         }
-        if (count($data) === 2 && $data[array_key_last($data)] < $year_created_at) {
+        if (count($data) === 2 && $data[array_key_last($data)] < 13) {
             $data[] = $year_created_at;
         }
         $results[] = implode("/", $data);

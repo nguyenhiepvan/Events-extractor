@@ -34,6 +34,7 @@ function tryGetYearCreatedAt(string $contents): int
     $separator = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
 
     $date_regexes = [
+        "/{$hour}{$separator}{$minutes}{$separator}?{$seconds}?\s?{$separator}?\s?{$day}{$separator}{$month}{$separator}{$year}/u",
         "/{$day}{$separator}{$month}{$separator}{$year}\s?{$separator}?\s?{$hour}{$separator}{$minutes}{$separator}?{$seconds}?/u",
     ];
     foreach ($date_regexes as $date_regex) {

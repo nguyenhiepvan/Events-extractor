@@ -1,7 +1,8 @@
 # TODO
 - [x] parse date, events
 - [x] parse breadcrumbs, keywords
-- [ ] complete date missing year
+- [x] complete date missing year
+- [x] standardize date format
 
 # TEST RESULTS
 [Original article](https://dantri.com.vn/kinh-doanh/huy-dong-von-cho-vinfast-nuoc-co-moi-cua-ty-phu-vuong-tren-dat-my-20220408081321465.htm)

@@ -9,17 +9,39 @@
 
 function parseHtml(string $contents): array
 {
-    $mains    = getTags($contents, "main");
-    $main     = $mains[0];
-    $articles = getTags($main, "article");
-    $events   = [];
-    [$breadcrumbs, $keywords] = parseKeywords($main);
-    foreach ($articles as $article) {
-        $paragraphs = getTags($article, "p");
-        $events[]   = parseEvent($paragraphs, $breadcrumbs, $keywords);
+    $events          = [];
+    $year_created_at = tryGetYearCreatedAt($contents);
+    $mains           = getTags($contents, "main");
+    foreach ($mains as $main) {
+        $articles = getTags($main, "article");
+        [$breadcrumbs, $keywords] = parseKeywords($main);
+        foreach ($articles as $article) {
+            $paragraphs = getTags($article, "p");
+            $events[]   = parseEvent($paragraphs, $breadcrumbs, $keywords, $year_created_at);
+        }
     }
-
     return array_merge(...$events);
+}
+
+function tryGetYearCreatedAt(string $contents): int
+{
+    $day       = "(?<day>\b(0?[1-9]|[12][0-9]|3[01])\b)";
+    $month     = "(?<month>\b(0?[1-9]|[1][0-2])\b)";
+    $year      = "(?<year>\d{4})";
+    $hour      = "(?<hour>\b(0?[0-9]|[1][0-9]|[2][0-3])\b)";
+    $minutes   = "(?<minutes>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
+    $seconds   = "(?<seconds>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
+    $separator = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
+
+    $date_regexes = [
+        "/{$day}{$separator}{$month}{$separator}{$year}\s?{$separator}?\s?{$hour}{$separator}{$minutes}{$separator}?{$seconds}?/u",
+    ];
+    foreach ($date_regexes as $date_regex) {
+        if (preg_match($date_regex, $contents, $matches)) {
+            return $matches["year"];
+        }
+    }
+    return date("y");
 }
 
 function parseKeywords(string $main): array
@@ -100,7 +122,7 @@ function getSentences(string $contents): array
     return preg_split('/(?<=[.?!])\s+(?=[a-z])/i', $contents);
 }
 
-function parseEvent(array $paragraphs, array $breadcrumbs = [], array $keywords = []): array
+function parseEvent(array $paragraphs, array $breadcrumbs = [], array $keywords = [], int $year_created_at = 0): array
 {
     $events = [];
     foreach ($paragraphs as $paragraph) {
@@ -111,6 +133,7 @@ function parseEvent(array $paragraphs, array $breadcrumbs = [], array $keywords 
         $sentences = getSentences($text);
         foreach ($sentences as $sentence) {
             if ($dates = getDates($sentence)) {
+                $dates = standardizeDate($dates, $year_created_at);
                 foreach ($dates as $date) {
                     $events[] = [
                         "date"       => $date,
@@ -129,6 +152,23 @@ function parseEvent(array $paragraphs, array $breadcrumbs = [], array $keywords 
     return $events;
 }
 
+function standardizeDate(array $dates, int $year_created_at): array
+{
+    $results   = [];
+    $separator = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
+    foreach ($dates as $date) {
+        $data = preg_split("/$separator/i", $date);
+        foreach ($data as &$_data) {
+            $_data = str_pad($_data, 2, '0', STR_PAD_LEFT);
+        }
+        if (count($data) === 2 && $data[array_key_last($data)] < $year_created_at) {
+            $data[] = $year_created_at;
+        }
+        $results[] = implode("/", $data);
+    }
+    return $results;
+}
+
 function shouldMerge(string $sentence): bool
 {
     $words = explode(" ", $sentence);
@@ -145,11 +185,11 @@ function getDates(string $contents): array
     $day          = "(?<day>\b(0?[1-9]|[12][0-9]|3[01])\b)";
     $month        = "(?<month>\b(0?[1-9]|[1][0-2])\b)";
     $year         = "(?<year>\d{4})";
-    $sperator     = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
+    $separator    = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
     $date_regexes = [
-        "/{$day}{$sperator}{$month}/u",
-        "/{$month}{$sperator}{$year}/u",
-        "/{$day}{$sperator}{$month}{$sperator}{$year}/u",
+        "/{$day}{$separator}{$month}/u",
+        "/{$month}{$separator}{$year}/u",
+        "/{$day}{$separator}{$month}{$separator}{$year}/u",
     ];
     $dates        = [];
     foreach ($date_regexes as $date_regex) {
@@ -170,16 +210,8 @@ function getDates(string $contents): array
 
 function isValidDate(string $date): bool
 {
-    $data = [];
-    if (str_contains($date, "/")) {
-        $data = explode("/", $date);
-    }
-    if (str_contains($date, "-")) {
-        $data = explode("-", $date);
-    }
-    if (str_contains($date, ".")) {
-        $data = explode(".", $date);
-    }
+    $separator = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
+    $data      = preg_split("/$separator/i", $date);
     if (count($data) === 2) {
         // d/m
         if (checkdate($data[1], $data[0], date("Y"))) {

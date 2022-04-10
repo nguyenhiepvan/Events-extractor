@@ -200,6 +200,13 @@ function getDates(string $contents): array
     }
     $dates   = array_unique(array_merge(...$dates));
     $results = [];
+    for ($i = 0, $iMax = count($dates); $i < $iMax - 1; $i++) {
+        for ($j = $i + 1; $j < $iMax; $j++) {
+            if (str_contains($dates[$j], $dates[$i])) {
+                unset($dates[$i]);
+            }
+        }
+    }
     foreach ($dates as $date) {
         if (isValidDate($date)) {
             $results[] = $date;

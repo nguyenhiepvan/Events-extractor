@@ -14,6 +14,13 @@ const REGEX_MINUTES   = "(?<minutes>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
 const REGEX_SECONDS   = "(?<seconds>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
 const REGEX_SEPARATOR = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
 
+function extractEvents(string $url): array
+{
+    $contents = getContents($url);
+    $contents = optimizeHtml($contents);
+    return parseHtml($contents);
+}
+
 function parseHtml(string $contents): array
 {
     $events          = [];

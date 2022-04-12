@@ -287,13 +287,13 @@ function optimizeHtml(string $contents): string
     ];
 
     foreach ($remove_tags as $tag) {
-        if ($_contents = preg_replace('#<' . $tag . '(.*?)>(.*?)</' . $tag . '>#is', '', $contents)) {
+        if (($_contents = preg_replace('#<' . $tag . '(.*?)>(.*?)</' . $tag . '>#is', '', $contents)) && is_string($_contents)) {
             $contents = $_contents;
         }
     }
 
     foreach ($remove_tags as $tag) {
-        if ($_contents = preg_replace('#<' . $tag . '(.*?)>#is', '', $contents)) {
+        if (($_contents = preg_replace('#<' . $tag . '(.*?)>#is', '', $contents)) && is_string($_contents)) {
             $contents = $_contents;
         }
     }

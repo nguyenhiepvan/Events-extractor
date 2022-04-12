@@ -6,6 +6,13 @@
  * Time: 22:05
  */
 
+const REGEX_DAY       = "(?<day>\b(0?[1-9]|[12][0-9]|3[01])\b)";
+const REGEX_MONTH     = "(?<month>\b(0?[1-9]|[1][0-2])\b)";
+const REGEX_YEAR      = "(?<year>[12][0-9]{3})"; //Years from 1000 to 2999
+const REGEX_HOUR      = "(?<hour>\b(0?[0-9]|[1][0-9]|[2][0-3])\b)";
+const REGEX_MINUTES   = "(?<minutes>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
+const REGEX_SECONDS   = "(?<seconds>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
+const REGEX_SEPARATOR = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
 
 function parseHtml(string $contents): array
 {
@@ -25,13 +32,13 @@ function parseHtml(string $contents): array
 
 function tryToGetYearCreatedAt(string $contents): int
 {
-    $day       = "(?<day>\b(0?[1-9]|[12][0-9]|3[01])\b)";
-    $month     = "(?<month>\b(0?[1-9]|[1][0-2])\b)";
-    $year      = "(?<year>[12][0-9]{3})"; //Years from 1000 to 2999
-    $hour      = "(?<hour>\b(0?[0-9]|[1][0-9]|[2][0-3])\b)";
-    $minutes   = "(?<minutes>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
-    $seconds   = "(?<seconds>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
-    $separator = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
+    $day       = REGEX_DAY;
+    $month     = REGEX_MONTH;
+    $year      = REGEX_YEAR;
+    $hour      = REGEX_HOUR;
+    $minutes   = REGEX_MINUTES;
+    $seconds   = REGEX_SECONDS;
+    $separator = REGEX_SEPARATOR;
 
     $date_regexes = [
         "/{$hour}{$separator}{$minutes}{$separator}?{$seconds}?\s?{$separator}?\s?{$day}{$separator}{$month}{$separator}{$year}/u",
@@ -48,7 +55,7 @@ function tryToGetYearCreatedAt(string $contents): int
 
 function tryToGetBestYear(string $contents): int
 {
-    $year = "(?<year>[12][0-9]{3})"; //Years from 1000 to 2999
+    $year = REGEX_YEAR; //Years from 1000 to 2999
     if (preg_match_all("/$year/u", $contents, $matches)) {
         $values = array_count_values($matches["year"]);
         arsort($values);
@@ -168,7 +175,7 @@ function parseEvent(array $paragraphs, array $breadcrumbs = [], array $keywords 
 function standardizeDate(array $dates, int $year_created_at): array
 {
     $results   = [];
-    $separator = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
+    $separator = REGEX_SEPARATOR;
     foreach ($dates as $date) {
         $data = preg_split("/$separator/i", $date);
         foreach ($data as &$_data) {
@@ -195,10 +202,10 @@ function shouldMerge(string $sentence): bool
 
 function getDates(string $contents): array
 {
-    $day          = "(?<day>\b(0?[1-9]|[12][0-9]|3[01])\b)";
-    $month        = "(?<month>\b(0?[1-9]|[1][0-2])\b)";
-    $year         = "(?<year>[12][0-9]{3})"; //Years from 1000 to 2999
-    $separator    = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
+    $day          = REGEX_DAY;
+    $month        = REGEX_MONTH;
+    $year         = REGEX_YEAR;
+    $separator    = REGEX_SEPARATOR;
     $date_regexes = [
         "/{$day}{$separator}{$month}/u",
         "/{$month}{$separator}{$year}/u",
@@ -230,7 +237,7 @@ function getDates(string $contents): array
 
 function isValidDate(string $date): bool
 {
-    $separator = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
+    $separator = REGEX_SEPARATOR;
     $data      = preg_split("/$separator/i", $date);
     if (count($data) === 2) {
         // d/m

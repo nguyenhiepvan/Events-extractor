@@ -10,7 +10,7 @@
 function parseHtml(string $contents): array
 {
     $events          = [];
-    $year_created_at = tryGetYearCreatedAt($contents);
+    $year_created_at = tryToGetYearCreatedAt($contents);
     $mains           = getTags($contents, "main");
     foreach ($mains as $main) {
         $articles = getTags($main, "article");
@@ -23,11 +23,11 @@ function parseHtml(string $contents): array
     return array_merge(...$events);
 }
 
-function tryGetYearCreatedAt(string $contents): int
+function tryToGetYearCreatedAt(string $contents): int
 {
     $day       = "(?<day>\b(0?[1-9]|[12][0-9]|3[01])\b)";
     $month     = "(?<month>\b(0?[1-9]|[1][0-2])\b)";
-    $year      = "(?<year>\d{4})";
+    $year      = "(?<year>[12][0-9]{3})"; //Years from 1000 to 2999
     $hour      = "(?<hour>\b(0?[0-9]|[1][0-9]|[2][0-3])\b)";
     $minutes   = "(?<minutes>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
     $seconds   = "(?<seconds>\b(0?[0-9]|[1-5][0-9]|[6][0])\b)";
@@ -41,6 +41,18 @@ function tryGetYearCreatedAt(string $contents): int
         if (preg_match($date_regex, $contents, $matches)) {
             return $matches["year"];
         }
+    }
+
+    return tryToGetBestYear($contents);
+}
+
+function tryToGetBestYear(string $contents): int
+{
+    $year = "(?<year>[12][0-9]{3})"; //Years from 1000 to 2999
+    if (preg_match_all("/$year/u", $contents, $matches)) {
+        $values = array_count_values($matches["year"]);
+        arsort($values);
+        return array_key_first($values);
     }
     return date("y");
 }
@@ -185,7 +197,7 @@ function getDates(string $contents): array
 {
     $day          = "(?<day>\b(0?[1-9]|[12][0-9]|3[01])\b)";
     $month        = "(?<month>\b(0?[1-9]|[1][0-2])\b)";
-    $year         = "(?<year>\d{4})";
+    $year         = "(?<year>[12][0-9]{3})"; //Years from 1000 to 2999
     $separator    = "(\:|\.|\,|\)|\-|\_|\/|\\|\}|\])";
     $date_regexes = [
         "/{$day}{$separator}{$month}/u",
